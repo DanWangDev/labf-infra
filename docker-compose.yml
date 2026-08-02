@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: labf-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hub
+      POSTGRES_USER: hub
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hub_dev_password}
+    volumes:
+      - labf-pgdata:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - labf-net
+
+volumes:
+  labf-pgdata:
+
+networks:
+  labf-net:
+    external: true
+    name: labf-net
