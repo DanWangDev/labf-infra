@@ -6,11 +6,28 @@ services:
     environment:
       POSTGRES_DB: hub
       POSTGRES_USER: hub
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-hub_dev_password}
+      # Required: refuse to run the shared identity DB with a default password.
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
     volumes:
       - labf-pgdata:/var/lib/postgresql/data
+    # Loopback only — apps reach the DB over labf-net; nothing else on the
+    # LAN should be able to connect to the identity database.
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
+    networks:
+      - labf-net
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: labf-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@labf.app}
+      # Required: never run the DB admin UI with the default password.
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:?PGADMIN_PASSWORD must be set}
+    # Loopback only — pgAdmin is a LAN-exposed DB UI.
+    ports:
+      - "127.0.0.1:5040:80"
     networks:
       - labf-net
 
