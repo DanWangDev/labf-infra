@@ -14,7 +14,7 @@
 set -euo pipefail
 
 NETWORK_NAME="${LABF_NETWORK:-labf-net}"
-DB_PASSWORD="${DB_PASSWORD:-hub_dev_password}"
+: "${DB_PASSWORD:?DB_PASSWORD must be set (no default password)}"
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "bootstrap: docker not found on PATH" >&2
