@@ -8,6 +8,7 @@ Shared Docker infrastructure for the Lab F 11+ suite. Owned by nobody — apps r
 |----------|------|---------|
 | `labf-net` | Docker bridge network | All app backends (hub, writing-buddy, vocab-master, story-sleuth) |
 | `labf-db` | PostgreSQL 17 container | hub (identity data), story-sleuth (reading comprehension data) |
+| `actions-runner` | GitHub Actions self-hosted runner (org-level) | Deploy pipelines of every app repo (see [docs/nas-runner-setup.md](docs/nas-runner-setup.md)) |
 
 ## Setup (once per host)
 
@@ -18,6 +19,11 @@ cd labf-infra
 ```
 
 `bootstrap.sh` is idempotent — safe to re-run. If the network or container already exists, it leaves them alone.
+
+**The shared GitHub Actions runner** is defined in `nas-runner/` — full
+setup walkthrough: [docs/nas-runner-setup.md](docs/nas-runner-setup.md).
+It registers at org level and runs every app repo's gated deploy workflow.
+Backups: run `./backup.sh` nightly and copy the output off-site.
 
 ## App database setup
 
