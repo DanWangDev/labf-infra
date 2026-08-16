@@ -1,0 +1,37 @@
+# Shared self-hosted GitHub Actions runner for the Lab F 11+ suite.
+# See docs/nas-runner-setup.md for the full setup walkthrough.
+#
+# REGISTERED AT ORG LEVEL (DanWangDev) — every org repo can dispatch jobs
+# with `runs-on: nas`. Keep repos private and write access limited; see the
+# security notes in the guide.
+#
+# Put the runner's one-time registration token in a local .env:
+#   RUNNER_TOKEN=<token from ORG Settings → Actions → Runners>
+# (never commit it — .env is gitignored)
+
+services:
+  runner:
+    build:
+      context: .
+      args:
+        RUNNER_VERSION: ${RUNNER_VERSION:-2.336.0}
+    container_name: actions-runner
+    restart: unless-stopped
+    environment:
+      RUNNER_ORG_URL: ${RUNNER_ORG_URL:-https://github.com/DanWangDev}
+      RUNNER_NAME: ${RUNNER_NAME:-nas-01}
+      RUNNER_LABELS: ${RUNNER_LABELS:-nas,deploy}
+      RUNNER_TOKEN: ${RUNNER_TOKEN:?RUNNER_TOKEN must be set — see docs/nas-runner-setup.md}
+    volumes:
+      # Runner binaries + credentials persist across container rebuilds
+      - runner-home:/actions-runner
+      # Drive the host Docker daemon (pull images, restart app stacks)
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Path parity with the host so `cd /volume1/docker/<repo>` inside the
+      # runner container IS the host directory the daemon sees. Shared
+      # across every app's deploy job.
+      - /volume1/docker:/volume1/docker
+    # Outbound HTTPS only (polls GitHub for jobs) — no published ports.
+
+volumes:
+  runner-home:
